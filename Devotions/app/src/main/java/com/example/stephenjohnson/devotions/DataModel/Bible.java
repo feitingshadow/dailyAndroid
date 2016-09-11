@@ -45,7 +45,7 @@ public class Bible {
         int resID = 0;
         switch (mBook) {
             case "tobit":
-                resID = R.raw.tobit;
+                resID = R.raw.psalms;
                 break;
             default:
                 break;
@@ -57,7 +57,7 @@ public class Bible {
         int nextIndex = 0;
         nextIndex = wholeStory.indexOf("{", lastIndex);
         mainTitleString = wholeStory.substring(lastIndex, nextIndex);
-        mainTitleString = mainTitleString.trim();
+        mainTitleString = mainTitleString.trim().replaceAll("\\s{2,}", " ");
 
         lastIndex = nextIndex;
 
@@ -95,7 +95,8 @@ public class Bible {
             mChapters.add(mVerses);
             currentChapter = readingChapter;
         }
-        String verseString = wholeStory.substring(verseCloseIndex+1, endIndex-1).trim();
+        //replace spacing in Psalms
+        String verseString = wholeStory.substring(verseCloseIndex+1, endIndex-1).trim().replaceAll("\\s{2,}", " ");
         verseString = verseString.replaceAll("\\r\\n|\\r|\\n", " ");
 
         mVerses.add(verseString);
