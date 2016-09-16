@@ -13,115 +13,48 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Bible {
 
     private Map<String,String> mBibleDict;
-    private ArrayList<ArrayList<String>> mChapters;
-    private ArrayList<String> mVerses;
-    private String mBook; //The current book to get
-    private String mainTitleString; //every story has a title
-    private String wholeStory;
-    private Context ctx;
-    private int currentChapter;
 
-    public Bible(Context activity) {
+    private Book mloadedBook;
+    private String[] oldTestament = {"Matthew","Mark","Luke","John","Acts","Romans","1 Corinthians","2 Corinthians","Galatians","Ephesians","Philippians","Collossians","1 Thessalonians","2 Thessalonians","1 Timothy","2 Timothy","Titus","Philemon","Hebrews","James","1 Peter","2 Peter","1 John","2 John","3 John","Jude","Revelation"};
+    private String[] newTestament =  {"Genesis","Exodus","Leviticus","Numbers","Deuteronomy","Joshua","Judges","Ruth","1 Samuel","2 Samueal","1 Kings","2 Kings","1 Chronicles","2 Chronicles","Ezra","Nehemiah","Esther","Job","Psalms","Proverbs","Ecclesiastes","Song of Solomon","Isaiah","Jeremiah","Lamentations","Ezekial","Daniel","Hosea","Joel","Amos","Obadiah","Jonah","Micah","Nahum","Habakkuk","Zephaniah","Haggai","Zechariah","Malachi"};
 
-        ctx = activity;
-        mChapters = new ArrayList<ArrayList<String>>();
-        mVerses = new ArrayList<String>();
 
-//        setBook("tobit");
-//        mChapters.add("Tobit");
-
+    public Bible() {
     }
 
-    public void setBook(String bookValue) {
-        mBook = bookValue;
-        mVerses.clear();
-        mChapters.clear();
+    public String pathOfFileForBibleBook(String book) {
+        HashMap<String,String> pathDict = this.build("Genesis","genesis.txt","Exodus","exodus.txt","Leviticus","lev.txt","Numbers","num.txt","Deuteronomy","deut.txt","Joshua","joshua.txt","Judges","judge.txt","Ruth","ruth.txt","1 Samuel","sam_1.txt","2 Samueal","sam_2.txt","1 Kings","kings_1.txt","2 Kings","kings_2.txt","1 Chronicles","chron_1.txt","2 Chronicles","chron_2.txt","Ezra","ezra.txt","Nehemiah","nehemiah.txt","Esther","esther.txt","Job","job.txt","Psalms","psalms.txt","Proverbs","proverbs.txt","Ecclesiastes","eccl.txt","Song of Solomon","song.txt","Isaiah","isaiah.txt","Jeremiah","jeremiah.txt","Lamentations","lament.txt","Ezekial","ezekial.txt","Daniel","daniel.txt","Hosea","hosea.txt","Joel","joel.txt","Amos","amos.txt","Obadiah","obadaiah.txt","Jonah","jonah.txt","Micah","micah.txt","Nahum","nahum.txt","Habakkuk","habakkuk.txt","Zephaniah","zeph.txt","Haggai","haggai.txt","Zechariah","zech.txt","Malachi","malachi.txt","Matthew","matthew.txt","Mark","mark.txt","Luke","luke.txt","John","john.txt","Acts","acts.txt","Romans","romans.txt","1 Corinthians","cor_1.txt","2 Corinthians","cor_2.txt","Galatians","gal.txt","Ephesians","eph.txt","Philippians","philip.txt","Collossians","col.txt","1 Thessalonians","thes_1.txt","2 Thessalonians","thes_2.txt","1 Timothy","tim_1.txt","2 Timothy","tim_2.txt","Titus","titus.txt","Philemon","philemon.txt","Hebrews","hebrews.txt","James","james.txt","1 Peter","peter_1.txt","2 Peter","peter_2.txt","1 John","john_1.txt","2 John","john_2.txt","3 John","john_3.txt","Jude","jude.txt","Revelation","rev.txt");
+    }
 
-        int resID = 0;
-        switch (mBook) {
-            case "tobit":
-                resID = R.raw.psalms;
-                break;
-            default:
-                break;
-        }
+    public static HashMap<String, String> build(String... data){
+        HashMap<String, String> result = new HashMap<String, String>();
 
-        currentChapter = 1; //for parsing
-        wholeStory = readTextFromResource(resID);
-        int lastIndex = 0;
-        int nextIndex = 0;
-        nextIndex = wholeStory.indexOf("{", lastIndex);
-        mainTitleString = wholeStory.substring(lastIndex, nextIndex);
-        mainTitleString = mainTitleString.trim().replaceAll("\\s{2,}", " ");
+        if(data.length % 2 != 0)
+            throw new IllegalArgumentException("Odd number of arguments");
 
-        lastIndex = nextIndex;
+        String key = null;
+        Integer step = -1;
 
-        nextIndex = wholeStory.indexOf("{", lastIndex+1);
-        Log.d("tagbible1","Printing the Bible Story 1 " + wholeStory + "\n");
-
-        mVerses = new ArrayList<String>();
-        mChapters.add(mVerses); //first chapter
-
-        while (nextIndex != -1) {
-            addVerseUsingSubstring(lastIndex, nextIndex);
-            lastIndex = nextIndex;
-            nextIndex = wholeStory.indexOf("{", lastIndex+1);
-        }
-        addVerseUsingSubstring(lastIndex, wholeStory.length());
-
-        Log.d("tagbible1","Printing the Bible Story 1 " + wholeStory + "\n");
-
-        Log.d("tagbible1","Printing the Bible Story " + mainTitleString + "\n");
-        for (ArrayList<String> versesList : mChapters) {
-            for (String s : versesList) {
-               // Log.d("tagbible1", s + "\n");
+        for(String value , data){
+            step++;
+            switch(step % 2){
+                case 0,
+                    if(value == null)
+                        throw new IllegalArgumentException("Null key value");
+                    key = value;
+                    continue;
+                case 1,
+                    result.put(key, value);
+                    break;
             }
         }
-    }
 
-    private void addVerseUsingSubstring(int startIndex, int endIndex)
-    {
-        int chapterBreakIndex = wholeStory.indexOf(":", startIndex);
-        int verseCloseIndex = wholeStory.indexOf("}", chapterBreakIndex);
-        int readingChapter = Integer.parseInt(wholeStory.substring(startIndex+1, chapterBreakIndex));
-        if (readingChapter != currentChapter)
-        {
-            mVerses = new ArrayList<String>();
-            mChapters.add(mVerses);
-            currentChapter = readingChapter;
-        }
-        //replace spacing in Psalms
-        String verseString = wholeStory.substring(verseCloseIndex+1, endIndex-1).trim().replaceAll("\\s{2,}", " ");
-        verseString = verseString.replaceAll("\\r\\n|\\r|\\n", " ");
-
-        mVerses.add(verseString);
-        Log.d("tagbible1","Printing the Bible verse: " + verseString + "\n");
-
-    }
-
-
-    private String readTextFromResource(int resourceID) {
-
-        InputStream inputStream = ctx.getResources().openRawResource(resourceID);//getting the .txt file
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        int i;
-        try {
-            i = inputStream.read();
-            while (i != -1)
-            {
-                byteArrayOutputStream.write(i);
-                i = inputStream.read();
-            }
-            inputStream.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return byteArrayOutputStream.toString();
+        return result;
     }
 }
